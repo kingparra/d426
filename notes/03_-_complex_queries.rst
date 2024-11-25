@@ -1,5 +1,9 @@
 3.1 Special operators and clauses
 ---------------------------------
+First, a gentle reminder: select quereies have to be written in the order
+::
+
+  SELECT ... FROM ... WHERE ... GROUP BY ... HAVING ... ORDER BY ... LIMIT
 
 IN operator
 ^^^^^^^^^^^
@@ -83,7 +87,7 @@ Date and time functions
 
 3.3 Aggregate functions
 -----------------------
-An aggregate function processes values froma set of rows and returns a summary value.
+An aggregate function works on multiple rows at once and returns a summary value.
 Common aggregate functions are:
 
 ::
@@ -92,7 +96,7 @@ Common aggregate functions are:
 
 Aggregate functions appear in a SELECT clause and process all rows that satisfy the
 WHERE clause condition. If a SELECT statement has no WHERE clause, the aggregate function
-processes all rows.
+processes all rows. Aggregate functions ignore NULL values.
 
 GROUP BY clause
 ^^^^^^^^^^^^^^^
@@ -140,6 +144,22 @@ The optional HAVING clause follows up the GROUP BY clause and precedes the optio
   FROM city
   GROUP BY CountryCode
   HAVING SUM(Population) > 2300000;
+
+Both WHERE and HAVING filter results, but HAVING is evaluated after grouping with GROUP BY.
+
+Aggregate functions and NULL values
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Aggregate functions ignore NULL values. For example ``sum(Salary)`` add all non-NULL salaries and
+ignores rows containing a NULL salary.
+
+Aggregate functions and arithmetic operators handle NULL differently.
+Arithmetic operators return NULL when either operand is NULL.
+
+As a result, combinations of arithmetic and aggregate functions may
+generate surprising results depending on how you combine them.
+
+For example, ``sum(Salary) + sum(Bonus)`` is not equal to ``sum(Salary + Bonus)``.
+
 
 3.4 Join queries
 ----------------
