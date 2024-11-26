@@ -231,9 +231,17 @@ An inner join selects only rows matching the ON condition which are present in b
 
 ::
 
-  SELECT *
-  FROM owners INNER JOIN cats
-    ON cats.owner = owners.id
+  -- +----+---------+        +----+-------+        +---------+-------+
+  -- | id | name    |        | id | owner |        | name    | owner |
+  -- +----+---------+        +----+-------+        +---------+-------+
+  -- |  1 | Alice   |        | 10 |  1    |        | Alice   |  1    |
+  -- |  2 | Bob     |        | 11 |  2    |        | Bob     |  2    |
+  -- |  3 | Charlie |        +----+-------+        +---------+-------+
+  -- +----+---------+
+
+  SELECT owners.name, pets.owner
+  FROM owners INNER JOIN pets
+    ON owners.id = pets.owner;
 
 Full join (union)
 ^^^^^^^^^^^^^^^^^
@@ -243,12 +251,34 @@ The full join is also known as the full outer join.
 
 ::
 
-  select *
-  from visitor as v
-  full join martian as m
-  where 
-    m.martian_id is null 
-    or v.visitor_id is null;
+  -- +----+----------+        +----+-------+        +----------+-------+
+  -- | id | name     |        | id | name  |        | emp_name | dept  |
+  -- +----+----------+        +----+-------+        +----------+-------+
+  -- |  1 | John     |        |  2 | HR    |        | John     | NULL  |
+  -- |  2 | Sarah    |        |  3 | IT    |        | Sarah    | HR    |
+  -- +----+----------+        +----+-------+        | NULL     | IT    |
+  --                                               +----------+-------+
+
+  SELECT employees.name AS emp_name, departments.name AS dept
+  FROM employees FULL OUTER JOIN departments
+    ON employees.id = departments.id;
+
+Unfortunately, MySQL doesn't support full joins, so you have
+to create the same effect by combining left outer joins and
+right outer joins using UNION.
+
+::
+
+  SELECT users.name, likes.like 
+  FROM users LEFT OUTER JOIN likes 
+    ON users.id = likes.user_id
+  UNION
+  SELECT users.name, likes.like 
+  FROM users RIGHT OUTER JOIN likes 
+    ON users.id = likes.user_id;
+
+What a mess.
+
 
 
 Left join
@@ -258,28 +288,36 @@ Rows not in the right table will have missing fields set to NULL.
 
 ::
 
-  SELECT *
-  FROM owners LEFT JOIN cats
-    ON cats.owner = owners.id
+  -- +----+----------+        +----+-------+        +----------+-------+
+  -- | id | title    |        | id | score |        | title    | score |
+  -- +----+----------+        +----+-------+        +----------+-------+
+  -- |  1 | Book A   |        |  1 |   5   |        | Book A   |   5   |
+  -- |  2 | Book B   |        +----+-------+        | Book B   | NULL  |
+  -- +----+----------+                               +----------+-------+
 
-You can also join two fields from the same table.
+  SELECT books.title, reviews.score
+  FROM books LEFT JOIN reviews
+    ON books.id = reviews.id;
 
-::
-  
-  SELECT
-    m.first_name as fn,
-    m.last_name as ln,
-    s.first_name as super_fn,
-    s.last_name as super_ln
-  FROM martian AS m
-  LEFT JOIN martian AS s
-  ON m.super_id = s.martian_id
-  ORDER BY m.martian_id;
 
 Right join
 ^^^^^^^^^^
 Selects all right table rows regardless of match, but only matching left table rows.
 Rows not in the left table will have missing fields set to NULL.
+
+::
+
+  -- +----+-------+        +----+-------+        +-------+-------+
+  -- | id | total |        | id | name  |        | total | name  |
+  -- +----+-------+        +----+-------+        +-------+-------+
+  -- |  1 |  100  |        |  1 | Alice |        |  100  | Alice |
+  -- +----+-------+        |  2 | Bob   |        | NULL  | Bob   |
+  --                       +----+-------+        +-------+-------+
+
+  SELECT orders.total, customers.name
+  FROM orders
+  RIGHT JOIN customers
+  ON orders.id = customers.id;
 
 ::
 
@@ -291,6 +329,42 @@ Rows not in the left table will have missing fields set to NULL.
   order by s.supply_id;
 
 
+Self join
+^^^^^^^^^
+You can also join two fields from the same table
+using any of the join operators above.
+This is known as a self join.
+
+
+::
+
+  -- +----+----------+-------+                       +----------+----------+
+  -- | id | name     | mgr   |                       | emp_name | mgr_name |
+  -- +----+----------+-------+                       +----------+----------+
+  -- |  1 | John     | NULL  |                       | Sarah    | John     |
+  -- |  2 | Sarah    |  1    |                       | Mike     | John     |
+  -- |  3 | Mike     |  1    |                       +----------+----------+
+  -- +----+----------+-------+
+
+  SELECT e1.name AS emp_name, e2.name AS mgr_name
+  FROM employees e1
+  LEFT JOIN employees e2
+  ON e1.mgr = e2.id;
+
+::
+  
+  SELECT
+    m.first_name as fn,
+    m.last_name  as ln,
+    s.first_name as super_fn,
+    s.last_name  as super_ln
+  FROM
+    martian AS m LEFT JOIN martian AS s
+  ON
+    m.super_id = s.martian_id
+  ORDER BY
+    m.martian_id;
+
 
 Cross join
 ^^^^^^^^^^
@@ -301,24 +375,35 @@ This is like a cartesian product.
 ::
 
   select b.base_id, s.supply_is, s.name,
-    (select quantity from inventory
-     where base_id = b.base_id and supply_id = s.supply_id)
+    coalesce((select quantity from inventory
+     where base_id = b.base_id and supply_id = s.supply_id)) as qantity
   from base as b
   cross join supply as s;
 
+::
+
+  -- +----+-------+        +----+-------+        +-------+-------+
+  -- | id | color |        | id | size  |        | color | size  |
+  -- +----+-------+        +----+-------+        +-------+-------+
+  -- |  1 | Red   |        |  1 | Small |        | Red   | Small |
+  -- |  2 | Blue  |        |  2 | Large |        | Red   | Large |
+  -- +----+-------+        +----+-------+        | Blue  | Small |
+  --                                             | Blue  | Large |
+  --                                             +-------+-------+
+
+  SELECT colors.color, sizes.size
+  FROM colors
+  CROSS JOIN sizes;
 
 Views
 -----
+
+Views
+^^^^^
 Views are a way to create a virtual table that is dynamically updated
-with the result of a select statement. The benefit here is that you
+with the results of a select statement. The benefit here is that you
 don't have to remember the query. You can also assign permissions to
 view that differ from the underlying tables the query came from.
-
-How to create a view
-^^^^^^^^^^^^^^^^^^^^
-1. Write a query.
-2. Insert a line above the query with "CREATE VIEW name AS".
-3. You can now treat name as a table.
 
 ::
 
