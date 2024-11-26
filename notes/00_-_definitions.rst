@@ -34,18 +34,27 @@ SQL (Structured Query Language)
 
   A domain specific language for working with relational databases.
 
-DDL (Data Definition Language)
+  SQL is divided into five sublanguages.
 
-  A subset of SQL that allows you to define and modify the structure
-  of database objects.
+  * **DDL (Data Definition Language)** defines the structure of the database.
 
-  CREATE, ALTER, DROP, TRUNCATE
+    CREATE, ALTER, DROP, TRUNCATE
 
-DML (Data Manipulation Language)
+  * **DQL (Data Query Language)** retrieves data from the database.
 
-  Subset of SQL that lets you manage the data within database objects.
+    SELECT
 
-  SELECT, INSERT, UPDATE, DELETE
+  * **DML (Data Manipulation Language)** manipulates data stored in a database.
+
+    INSERT, UPDATE, DELETE
+
+  * **DCL (Data Control Language)** controls database user access.
+
+    GRANT, REVOKE
+
+  * **DTL (Data Transaction Language)** manages database transactions.
+
+    BEGIN, COMMIT, ROLLBACK
 
 Database Application
 
