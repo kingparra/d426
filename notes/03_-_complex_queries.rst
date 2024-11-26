@@ -102,6 +102,13 @@ GROUP BY clause
 ^^^^^^^^^^^^^^^
 Aggregate functions are commonly used with the GROUP BY clause.
 With a GROUP BY clause, each value of the column(s) becomes a group.
+
+The evaluation process looks something like this:
+
+1. Split the table into groups for each value that you grouped by.
+2. Calculate the aggregates from the query for each group.
+3. Create a result set with 1 row for each group.
+
 ::
 
   CREATE TABLE sales (
@@ -112,13 +119,14 @@ With a GROUP BY clause, each value of the column(s) becomes a group.
       price DECIMAL(10, 2)
   );
 
-  INSERT INTO sales (product_name, category, quantity, price)
+  INSERT INTO sales 
+    (product_name, category, quantity, price)
   VALUES 
-  ('Laptop', 'Electronics', 2, 1500.00),
-  ('Smartphone', 'Electronics', 5, 800.00),
-  ('Headphones', 'Accessories', 10, 50.00),
-  ('Keyboard', 'Accessories', 3, 100.00),
-  ('Smartwatch', 'Electronics', 1, 200.00);
+    ('Laptop', 'Electronics', 2, 1500.00),
+    ('Smartphone', 'Electronics', 5, 800.00),
+    ('Headphones', 'Accessories', 10, 50.00),
+    ('Keyboard', 'Accessories', 3, 100.00),
+    ('Smartwatch', 'Electronics', 1, 200.00);
 
   SELECT category,
          COUNT(*) AS total_products,
@@ -171,23 +179,13 @@ In SQL, joins are implemented using the SELECT statement.
 The related column must have the same datatype in all tables
 to be eligible for comparision with join queries.
 
-Inner join (intersection)
-^^^^^^^^^^^^^^^^^^^^^^^^^
 ::
 
-  Department                                       Employee                                    Result
-  +----------+-------------------+------------+    +---------+------------------+---------+    +--------------------+--------------------+
-  | Code[pk] | DepartmentName    | Manager[fk]|    | ID[pk]  |  EmployeeName    |  Salary |    | DepartmentName     | EmployeeName       |
-  +----------+-------------------+------------+    +---------+------------------+---------+    +--------------------+--------------------+
-  | 44       | Engineering       | 2538       |    | 2538    |  Lisa Ellison    |  45000  |    | Engineering        | Lisa Ellison       |
-  | 82       | Sales             | 6381       |    | 5384    |  Sam Snead       |  30500  |    | Sales              | Maria Rodriguez    |
-  | 12       | Marketing         | 6381       |    | 6381    |  Maria Rodriguez |  92300  |    | Marketing          | Maria Rodriguez    |
-  | 99       | Technical Support | NULL       |    +---------+------------------+---------+    +--------------------+--------------------+
-  +----------+-------------------+------------+
+  select 
 
-  select DepartmentName, EmployeeName
-  from Department, Employee
-  where Manager = ID;
+When only combining two tables at a time, the first is known
+as the **left table**, and the second is known as the **right table**.
+This terminology reminds me of diff operations.
 
 Prefixes and aliases
 ^^^^^^^^^^^^^^^^^^^^
@@ -202,4 +200,150 @@ You can also incorporate aliases (with AS) to simpilify the rest of the query.
     Employee.Name   as Supervisor
   from Department, Employee
   where Manager = ID;
+
+You can also alias the name of the tables, like this:
+
+::
+
+  select d.name, e.name
+  from
+    Department as d,
+    Employee as e
+  where Manager = ID;
+
+Guidelines for simple joins
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Here is some advice to keep your joins as simple as possible.
+
+1. Only use LEFT JOIN and INNER JOIN.
+
+2. Refer to columns as table_name.column_name.
+
+3. Only include 1 condition in your join.
+
+4. One of the joined columns should have unique values.
+
+
+Inner join (intersection)
+^^^^^^^^^^^^^^^^^^^^^^^^^
+An inner join is like a set intersection in math.
+An inner join selects only rows matching the ON condition which are present in both tables.
+
+::
+
+  SELECT *
+  FROM owners INNER JOIN cats
+    ON cats.owner = owners.id
+
+Full join (union)
+^^^^^^^^^^^^^^^^^
+This is like a set union operation.
+It selects all left and right table rows regardless of match.
+The full join is also known as the full outer join.
+
+::
+
+  select *
+  from visitor as v
+  full join martian as m
+  where 
+    m.martian_id is null 
+    or v.visitor_id is null;
+
+
+Left join
+^^^^^^^^^
+Left join includes every row from the left tabel, even if it's not in the right table.
+Rows not in the right table will have missing fields set to NULL.
+
+::
+
+  SELECT *
+  FROM owners LEFT JOIN cats
+    ON cats.owner = owners.id
+
+You can also join two fields from the same table.
+
+::
+  
+  SELECT
+    m.first_name as fn,
+    m.last_name as ln,
+    s.first_name as super_fn,
+    s.last_name as super_ln
+  FROM martian AS m
+  LEFT JOIN martian AS s
+  ON m.super_id = s.martian_id
+  ORDER BY m.martian_id;
+
+Right join
+^^^^^^^^^^
+Selects all right table rows regardless of match, but only matching left table rows.
+Rows not in the left table will have missing fields set to NULL.
+
+::
+
+  select *
+  from
+    (select * from inventory where base_id = 1) as i
+  right join supply as s
+  on i.supply_id = s.supply_id
+  order by s.supply_id;
+
+
+
+Cross join
+^^^^^^^^^^
+Performs a cross product between two tables.
+Connects each row in the left table with each row in the second table.
+This is like a cartesian product.
+
+::
+
+  select b.base_id, s.supply_is, s.name,
+    (select quantity from inventory
+     where base_id = b.base_id and supply_id = s.supply_id)
+  from base as b
+  cross join supply as s;
+
+
+Views
+-----
+Views are a way to create a virtual table that is dynamically updated
+with the result of a select statement. The benefit here is that you
+don't have to remember the query. You can also assign permissions to
+view that differ from the underlying tables the query came from.
+
+How to create a view
+^^^^^^^^^^^^^^^^^^^^
+1. Write a query.
+2. Insert a line above the query with "CREATE VIEW name AS".
+3. You can now treat name as a table.
+
+::
+
+  CREATE VIEW martian_public AS
+  SELECT 
+    martian_id,
+    first_name,
+    last_name,
+    base_id,
+    super_id
+  FROM
+    martian_confidential;
+
+Unions
+------
+If you want to combine the results of two SELECT queries, you can use a UNION.
+
+::
+
+  SELECT martian_id, first_name, last_name, 'Martian' as status
+  FROM martian_public
+    UNION
+  SELECT visitor_id, first_name, last_name, 'Visitor' as status
+  FROM visitor;
+
+The two select queries must have the same number of columns and the types must be the same.
+
 
