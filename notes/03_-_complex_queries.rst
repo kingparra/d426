@@ -417,8 +417,11 @@ view that differ from the underlying tables the query came from.
   FROM
     martian_confidential;
 
+Set-based operations
+--------------------
+
 Unions
-------
+^^^^^^
 If you want to combine the results of two SELECT queries, you can use a UNION.
 
 ::
@@ -429,6 +432,54 @@ If you want to combine the results of two SELECT queries, you can use a UNION.
   SELECT visitor_id, first_name, last_name, 'Visitor' as status
   FROM visitor;
 
-The two select queries must have the same number of columns and the types must be the same.
+For UNION to work without errors, all SELECT statements must have the same
+number of columns and the corresponding columns must have the same datatype.
+UNION will return duplicate results, unless you change the operator name to
+``UNION ALL``.
 
+Intersect
+^^^^^^^^^
+The INTERSECT operator returns only identical rows from two tables.
+
+::
+
+  SELECT artist FROM artitst
+    INTERSECT
+  SELECT artist_id from album;
+
+Except
+^^^^^^
+The EXCEPT operaot returns only those rows from the left table that
+are not present in the right table.
+
+::
+
+  select artist_id from artists
+    EXCEPT
+  select artist_id from album;
+
+
+Semi-join
+^^^^^^^^^
+A semi-join chooses records in the first table where a condition
+is met in the second table. A semi-join makes use of a WHERE clause
+to use th second table as a filter for the first.
+
+::
+
+  select * from albumn
+  where artist_id in
+    (select artist_id from artists);
+
+Anti-join
+^^^^^^^^^
+The anti-join chooses records in the first table where a condition is not
+met in the second table. It makes use of a where clause to use exclude values
+from the second table.
+
+::
+
+  select * from album
+  where artist_id not in
+    (select artist_id from artist);
 
