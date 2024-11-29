@@ -758,6 +758,21 @@ You can do case expressions in SQL.
   from people;
 
 
+Common Table Expressions (CTEs)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+::
+
+  with popular_dog_names as (
+    select name
+    from dogs
+    group by name
+    having count(*) > 2
+  )
+  select owner
+  from dogs inner join popular_dog_names
+    on dogs.name = popular_dog_names.name;
+
+
 3.7 Complex query example
 -------------------------
 
