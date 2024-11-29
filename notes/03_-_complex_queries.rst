@@ -22,9 +22,10 @@ Check if an ordinal is within a range.
 
 LIKE operator
 ^^^^^^^^^^^^^
-Do case insensitive substring matching (globbing). ``%`` is like ``*`` and ``_`` is like ``?``.
+Do case insensitive substring matching (globbing).
+``%`` is like ``*`` and ``_`` is like ``?``.
 ::
-  
+
   select * from CountryLanguage where Language like 'A%n';
 
   -- make it case sensitive
@@ -112,25 +113,26 @@ The evaluation process looks something like this:
 ::
 
   CREATE TABLE sales (
-      id INT AUTO_INCREMENT PRIMARY KEY,
-      product_name VARCHAR(50),
-      category VARCHAR(50),
-      quantity INT,
-      price DECIMAL(10, 2)
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    product_name VARCHAR(50),
+    category VARCHAR(50),
+    quantity INT,
+    price DECIMAL(10, 2)
   );
 
-  INSERT INTO sales 
+  INSERT INTO sales
     (product_name, category, quantity, price)
-  VALUES 
+  VALUES
     ('Laptop', 'Electronics', 2, 1500.00),
     ('Smartphone', 'Electronics', 5, 800.00),
     ('Headphones', 'Accessories', 10, 50.00),
     ('Keyboard', 'Accessories', 3, 100.00),
     ('Smartwatch', 'Electronics', 1, 200.00);
 
-  SELECT category,
-         COUNT(*) AS total_products,
-         SUM(quantity) AS total_quantity
+  SELECT
+    category,
+    COUNT(*) AS total_products,
+    SUM(quantity) AS total_quantity
   FROM sales
   GROUP BY category;
 
@@ -157,8 +159,9 @@ Both WHERE and HAVING filter results, but HAVING is evaluated after grouping wit
 
 Aggregate functions and NULL values
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Aggregate functions ignore NULL values. For example ``sum(Salary)`` add all non-NULL salaries and
-ignores rows containing a NULL salary.
+Aggregate functions ignore NULL values.
+For example ``sum(Salary)`` add all non-NULL salaries 
+and ignores rows containing a NULL salary.
 
 Aggregate functions and arithmetic operators handle NULL differently.
 Arithmetic operators return NULL when either operand is NULL.
@@ -171,17 +174,18 @@ For example, ``sum(Salary) + sum(Bonus)`` is not equal to ``sum(Salary + Bonus)`
 
 3.4 Join queries
 ----------------
+https://dev.mysql.com/doc/refman/8.0/en/join.html
+
 Joins combine rows from multiple tables based on a related column.
 They allow you to retrieve related data stored in separate tables.
 Conceptually, joins are similar to set operations in math.
 
-In SQL, joins are implemented using the SELECT statement.
+In SQL, joins are implemented using the FROM+JOIN clause of the
+SELECT statement. But inner and outer joins can technically be
+written without a join clause.
+
 The related column must have the same datatype in all tables
 to be eligible for comparision with join queries.
-
-::
-
-  select 
 
 When only combining two tables at a time, the first is known
 as the **left table**, and the second is known as the **right table**.
@@ -195,7 +199,7 @@ You can also incorporate aliases (with AS) to simpilify the rest of the query.
 
 ::
 
-  select 
+  select
     Department.Name as Group,
     Employee.Name   as Supervisor
   from Department, Employee
@@ -213,7 +217,7 @@ You can also alias the name of the tables, like this:
 
 Guidelines for simple joins
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Here is some advice to keep your joins as simple as possible.
+Here's some advice to keep your joins as simple as possible.
 
 1. Only use LEFT JOIN and INNER JOIN.
 
@@ -223,6 +227,7 @@ Here is some advice to keep your joins as simple as possible.
 
 4. One of the joined columns should have unique values.
 
+---------------------------------------------------------------
 
 Inner join (intersection)
 ^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -242,6 +247,12 @@ An inner join selects only rows matching the ON condition which are present in b
   SELECT owners.name, pets.owner
   FROM owners INNER JOIN pets
     ON owners.id = pets.owner;
+
+Outer join
+^^^^^^^^^^
+An **outer join** is any join that selects unmatched rows, including left, right, and full joins.
+MySQL suppors inner, left, and right join but not full join.
+
 
 Full join (union)
 ^^^^^^^^^^^^^^^^^
@@ -269,17 +280,18 @@ right outer joins using UNION.
 
 ::
 
-  SELECT users.name, likes.like 
-  FROM users LEFT OUTER JOIN likes 
+  SELECT users.name, likes.like
+  FROM users LEFT OUTER JOIN likes
     ON users.id = likes.user_id
   UNION
-  SELECT users.name, likes.like 
-  FROM users RIGHT OUTER JOIN likes 
+  SELECT users.name, likes.like
+  FROM users RIGHT OUTER JOIN likes
     ON users.id = likes.user_id;
 
 What a mess.
 
 
+---------------------------------------------------------------
 
 Left join
 ^^^^^^^^^
@@ -299,6 +311,24 @@ Rows not in the right table will have missing fields set to NULL.
   FROM books LEFT JOIN reviews
     ON books.id = reviews.id;
 
+If you wanted to, you can write left join using the UNION operator instead of a JOIN
+clause. The example below shows two equivalent expressions:
+
+::
+
+  select Department.Name, Employee.Name
+  from Department
+  left join Employee
+  on Manager = ID;
+
+  select Department.Name, Employee.Name
+  from Department, Employee
+  where Manager = ID
+    UNION
+  select Department.Name, NULL
+  from Department
+  where Manager not in (select ID from Employee)
+    or Manager is NULL;
 
 Right join
 ^^^^^^^^^^
@@ -328,6 +358,7 @@ Rows not in the left table will have missing fields set to NULL.
   on i.supply_id = s.supply_id
   order by s.supply_id;
 
+---------------------------------------------------------------
 
 Self join
 ^^^^^^^^^
@@ -352,7 +383,7 @@ This is known as a self join.
   ON e1.mgr = e2.id;
 
 ::
-  
+
   SELECT
     m.first_name as fn,
     m.last_name  as ln,
@@ -395,6 +426,8 @@ This is like a cartesian product.
   FROM colors
   CROSS JOIN sizes;
 
+---------------------------------------------------------------
+
 Views
 -----
 
@@ -408,7 +441,7 @@ view that differ from the underlying tables the query came from.
 ::
 
   CREATE VIEW martian_public AS
-  SELECT 
+  SELECT
     martian_id,
     first_name,
     last_name,
@@ -416,6 +449,7 @@ view that differ from the underlying tables the query came from.
     super_id
   FROM
     martian_confidential;
+
 
 Set-based operations
 --------------------
@@ -482,4 +516,276 @@ from the second table.
   select * from album
   where artist_id not in
     (select artist_id from artist);
+
+
+3.5 Equijoins, self-joins, and cross-joins
+------------------------------------------
+
+Equijoins
+^^^^^^^^^
+An **eqijoin** compares columns of two tables with the = operator.
+Most joins are equijoins.
+A **non-equijion** compares columns with an operator other than =, such as < and >.
+
+::
+
+  select Name, Address
+  from Buyer left join Property
+  on Price < MaxPrice;
+
+Self-joins
+^^^^^^^^^^
+A **self-join** joins a table to iself.
+A self-join can compare any columns of table, as long as the columns have comparable data types.
+If a foreign key and the referenced primary key are in the same table, a self-join commonly compares those key columns.
+In a self-join aliases are necessary to distinguish left and right tables.
+
+::
+
+  +--------+--------------------+-----------+
+  |  ID    |  Name              |  Manager  |
+  +--------+--------------------+-----------+
+  |  2538  |  Lisa Ellison      |  8820     |
+  |  5384  |  Sam Snead         |  8820     |
+  |  6381  |  Maria Rodriguez   |  8820     |
+  |  8820  |  Jiho Chen         |  NULL     |
+  +--------+--------------------+-----------+
+
+  select
+    A.Name,
+    B.Name
+  from
+    EmployeeManager as A
+    inner join
+    EmployeeManager as B
+  on
+    B.ID = A.Manager;
+
+  +-------------------+-------------+
+  |  A.Name           |  B.Name     |
+  +-------------------+-------------+
+  |  Lisa Ellison     |  Jiho Chen  |
+  |  Sam Snead        |  Jiho Chen  |
+  |  Maria Rodriguez  |  Jiho Chen  |
+  |  Jiho Chen        |  Jiho Chen  |
+  +-------------------+-------------+
+
+Cross-joins
+^^^^^^^^^^^
+A **cross-join** combines two tables without comparing columns.
+It's basically a cartesian product of two tables.
+A cross-join uses a CROSS JOIN clause without an ON clause.
+As a result all possible combinations of rows from both tables appear in the result.
+See the cross-join description in 3.4 for an example diagram.
+
+
+3.6 Subqueries
+--------------
+A **subquery** in SQL is a query nested inside another query. It allows you to
+use the result of one query as input for another, enabling more complex and
+dynamic operations. Think of it as command substitution in bash, but for SQL.
+
+A subquery can appear in...
+
+* SELECT (returning values for computation)
+* FROM (as a derived table)
+* WHERE or HAVING (to filter results)
+
+Subqueries can return either a...
+
+* Scalar (a single value)
+* Row (a row with multiple columns)
+* Table (an entire result table)
+
+Subqueries can be nested within other subqueries, however it can make
+statements hard to read, and slow down performance.
+
+EX: Find employees earning more than the average salary:
+
+::
+
+  select name from employees
+  where salary > (select avg(salary) from employees);
+
+EX: Return language and percentage for rows with a higher percentage of speakers than Dutch.
+
+.. code:: mysql
+
+  -- CountryLanguage
+  -- +---------------+------------------+--------------+--------------+
+  -- |  CountryCode  |  Language        |  IsOfficial  |  Percentage  |
+  -- +---------------+------------------+--------------+--------------+
+  -- |  ABW          |  Dutch           |  T           |  5.3         |
+  -- |  AFG          |  Balochi         |  F           |  0.9         |
+  -- |  AGO          |  Kongo           |  F           |  13.2        |
+  -- |  ALB          |  Albanian        |  T           |  97.9        |
+  -- |  AND          |  Catalan         |  T           |  32.3        |
+  -- +---------------+------------------+--------------+--------------+
+
+  select Langauge, Percentage
+  from CountryLanguage
+  where
+    /* The subquery evaluates to 5.3 */
+    Percentage > (select Percentage from CountryLanguage
+                  where CountryCode = 'ABW' and IsOfficial = 'T');
+
+  -- +-----------------+--------------+
+  -- |  Language       |  Percentage  |
+  -- +-----------------+--------------+
+  -- |  Kongo          |  13.2        |
+  -- |  Albanian       |  97.9        |
+  -- |  Catalan        |  32.3        |
+  -- +-----------------+--------------+
+
+EX: Add a column showing the department name for each employee:
+
+::
+
+  SELECT name, 
+         (SELECT department_name 
+          FROM departments 
+          WHERE departments.id = employees.department_id) AS dept_name
+  FROM employees;
+
+Correlated subqueries
+^^^^^^^^^^^^^^^^^^^^^
+**A subquery is correlated when the subquery's WHERE clause references a column from the outer query.**
+In a correlated subquery, the rows selected depend on what row is currently being examined by the outer query.
+
+Since you are often dealing with multiple tables that may share the same column names in these subqueries,
+you should use aliases or prefixes to disambiguate which table the column belongs to.
+
+EXISTS operator
+^^^^^^^^^^^^^^^
+Correlated subqueries commonly use the EXISTS opeator, which returns TRUE if a subquery selects at least
+one row and FALSE if no rows are selected. The NOT operator negates the return value of EXISTS.
+
+::
+
+  Select Name, CountryCode
+  FROM City as C
+  WHERE EXISTS (SELECT * 
+                FROM CountryLanguage
+                WHERE CountryCode = C.CountryCode 
+                      AND Percentage > 97);
+
+Flattening subqueries
+^^^^^^^^^^^^^^^^^^^^^
+.. TODO Skim from here on and circle back.
+
+**This is where I start to lose reading comprehension.**
+
+Many subqueries can be rewritten as a join.
+Most databases optimize a subquery and outer query separately, whereas joins are optimized in one pass.
+So joins are usually faster and preferred when performance is a concern.
+
+Replacing a subquery with an equivalent join is called **flattening** a query.
+The criteria for flattening subqueries are complex and depend on the SQL implementation in each database system.
+**Most subqueries that follow IN or EXISTS, or return a single value, can be flattened.**
+Most subqueries that follow NOT EXISTS or contain a GROUP BY clause cannot be flattened.
+
+The following steps are a first pass at flattening a query:
+
+1. Retain the outer SELECT, FROM, GROUP BY, HAVING, and ORDER BY clauses.
+
+2. Add INNER JOIN clauses for each subquery table.
+
+3. Move comparisons between subquery and outer query columns to ON clauses.
+
+4. Add a WHERE clause with the remaining expressions in the subquery and outer query WHERE clauses.
+
+5. If necessary, remove duplicate rows with SELECT DISTINCT.
+
+::
+
+  select Name 
+  from Country 
+  where Code in (select CountryCode 
+                 from City 
+                 where Population > 10000000);
+
+  select distinct Name 
+  from Country inner join City on Code = CountryCode 
+  where population > 1000000;
+
+
+Window functions
+----------------
+Window functions are an advanced SQL feature.
+Window functions are SQL expressions that let you reference values in other rows.
+They syntax is:
+
+::
+
+  [expression] OVER ([window definition])
+
+::
+
+  select item, dat - lag(day) over (order by day) from sales;
+
+A window is a set of rows.
+A window can be as big as the whole table (an empty OVER is the whole table),
+or as small as just one row.
+
+::
+
+  select name, class, grade
+    row_number() over (partition by class order by grade desc) as rank_in_class
+  from grades;
+
+This reminds me of mapping a function over a collection.
+
+::
+
+  select event, hour,
+         hour - lag(hour)
+         over(partition by event order by hour asc) as time_since_last
+  from baby_log
+  where event in ('feeding', 'diaper')
+  order by hour asc;
+
+CASE
+^^^^
+You can do case expressions in SQL.
+
+::
+
+  select first_name, age, case
+      when age < 13 then 'child'
+      when age < 20 then 'teenager'
+      else 'adult'
+    end as age_range
+  from people;
+
+
+3.7 Complex query example
+-------------------------
+
+Writing a complex query
+^^^^^^^^^^^^^^^^^^^^^^^
+* Examine the Entity Relationship Diagram to understand the tables and relationships.
+
+* Identify tables containing the data needed to answer the question.
+
+* Determine which columns should appear in the result table.
+
+* Write a query that joins the tables on the primary and foreign keys.
+
+* Break the problem into simple queries, writing one part of the query at a time.
+
+Joining tables
+^^^^^^^^^^^^^^
+**Which books written by a single author generated the most sales to customers from Colorado or Oklahoma in Februrary 2020?**
+
+The result table should contain the following 
+``Customer.State``, ``Sale.BookID``, ``Book.Title``, ``Sale.Quantity``, and total price ``(Sale.Quantity * Sale.UnitPrice)``.
+
+::
+
+  SELECT C.State, S.BookID, B.Title, SUM(S.Quantity) AS Quantity, SUM(S.UnitPrice * S.Quantity) AS TotalSales
+  FROM Sale S
+  INNER JOIN Customer C ON C.ID = S.CustID
+  INNER JOIN Book AS B ON B.ID = S.BookID 
+  GROUP BY C.State, S.BookID
+  ORDER BY TotalSales DESC;
 
