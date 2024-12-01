@@ -760,14 +760,15 @@ You can do case expressions in SQL.
 
 Common Table Expressions (CTEs)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+You can use CTEs in a FROM or WHERE clause.
+
 ::
 
   with popular_dog_names as (
     select name
     from dogs
     group by name
-    having count(*) > 2
-  )
+    having count(*) > 2)
   select owner
   from dogs inner join popular_dog_names
     on dogs.name = popular_dog_names.name;
@@ -790,17 +791,173 @@ Writing a complex query
 
 Joining tables
 ^^^^^^^^^^^^^^
-**Which books written by a single author generated the most sales to customers from Colorado or Oklahoma in Februrary 2020?**
+**Which books written by a single author generated the most sales to customers from Colorado 
+or Oklahoma in Februrary 2020?**
 
-The result table should contain the following 
-``Customer.State``, ``Sale.BookID``, ``Book.Title``, ``Sale.Quantity``, and total price ``(Sale.Quantity * Sale.UnitPrice)``.
+The result table should contain the following **Customer state**, **Book ID**, **Book Title**,
+the **number of books purchased**, and **total price**.
 
 ::
 
-  SELECT C.State, S.BookID, B.Title, SUM(S.Quantity) AS Quantity, SUM(S.UnitPrice * S.Quantity) AS TotalSales
-  FROM Sale S
-  INNER JOIN Customer C ON C.ID = S.CustID
-  INNER JOIN Book AS B ON B.ID = S.BookID 
-  GROUP BY C.State, S.BookID
+  -- Input tables: Customer, Sale, Book
+  -- Input attributes: Sale.BookID, Book.Title, Sale.Quantity, Sale.UnitPrice
+  -- Join on these columns: Customer.ID and Sale.CustID, Book.ID and Sale.BookID
+  -- What happens when you have two joins like this?
+
+  SELECT
+    Customer.State,
+    Sale.BookID,
+    Book.Title,
+    SUM(Sale.Quantity) AS Quantity,
+    SUM(Sale.UnitPrice * Sale.Quantity) AS TotalSales
+  FROM 
+    Sale
+  INNER JOIN Customer ON Customer.ID = Sale.CustID
+  INNER JOIN     Book ON Book.ID = Sale.BookID 
+  GROUP BY Customer.State, Sale.BookID
   ORDER BY TotalSales DESC;
 
+.. topic:: How do you set a variable?
+
+   SQL doesn't support variables according to the standard,
+   but most database engines have extended the language to
+   include them.
+
+   ::
+    
+      -- session variables
+      -- MySQL uses "set" and PostgreSQL uses "declare" to initialize a variable with a value.
+      set @var_name = 'value';
+      select @var_name; -- Output: value
+
+      -- local variables
+      create procedure example_proc()
+      begin
+        declare my_var int;
+        set my_var = 10;
+        select my_var;
+      end;
+
+      call example_proc();
+
+
+3.8 View tables
+---------------
+
+Creating views
+^^^^^^^^^^^^^^
+A **view table** is a table name associated with a SELECT statment called the **view query**.
+
+::
+
+  CREATE VIEW ViewName [ (Col1, Col2, ...) ]
+  AS SelectStatement;
+
+Querying views
+^^^^^^^^^^^^^^
+A table specified in the view query's FROM clause is called a base table.
+Unlike base table data, view table data is not normally stored, but calculated dynamically instead.
+
+In some DBs view data can be stored in a **materalized view**.
+Whenever the base table changes, the materalized view is updated.
+
+To avoid the overheaad of refreshing views, MySQL and many other DBs don't support materalized views.
+
+Advantages of views
+^^^^^^^^^^^^^^^^^^^
+View tables have several advantages:
+
+* Protect sensitive data.
+
+  A view can hide sensitive columns by selecting only needed columns from the base table.
+  After that, the view table can be assigned different permissions than the underlying base tables.
+
+* Save complex queries.
+
+* Save optimized queries.
+
+Inserting, updating, and deleting views
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Using views in INSERT, UPDATE, and DELETE statements is problematic.
+
+* **Primary keys.** If a base table primary key doesn't appear in a view,
+  an insert to the view generates a NULL primary key value.
+  Since primary keys may not be NULL, the insert is not allowed.
+
+* **Aggregate values.** A view query may contain aggregate functions such as AVG() or SUM().
+  One aggregate value corresponds to many base table values.
+  The conversion is undefined, so the insert or update is not allowed.
+
+* **Join views.** In a join view, foreign keys of one base table may match primary keys of another.
+  A delete from a view might delete foreign key rows only, or primary key rows only, or both the primary and foreign key rows.
+  The effect of the join view delete is undefined and therefore not allowed.
+
+WITH CHECK OPTION clause
+^^^^^^^^^^^^^^^^^^^^^^^^
+When WITH CHECK OPTION is specified, the DB rejects inserts and updates that don't satisfy the view query's WHERE clause.
+
+::
+
+  CREATE VIEW ViewName [ (Col1, Col2, ...) ]
+  AS SelectStatement
+  [ WITH CHECK OPTION ];
+
+
+
+3.9 Relational algebra
+----------------------
+
+Operations and expressions
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+In relational algebra, the various operations of SQL are denoted using infix binary operators.
+
++-----------------+----------+----------------+------------------------------------------------------+
+|  Operation      |  Symbol  |  Greek letter  |  Derivation                                          |
++=================+==========+================+======================================================+
+|  Select         |    σ     |   sigma        |  Corresponds to Latin letter s, for select.          |
++-----------------+----------+----------------+------------------------------------------------------+
+|  Project        |    Π     |   pi           |  Corresponds to Latin letter P, for project.         |
++-----------------+----------+----------------+------------------------------------------------------+
+|  Product        |    ×     |                |  Multiplication symbol.                              |
++-----------------+----------+----------------+------------------------------------------------------+
+|  Join           |    ⋈     |                |  Multiplication symbol with vertical bars.           |
++-----------------+----------+----------------+------------------------------------------------------+
+|  Union          |    ∪     |                |  Set theory.                                         |
++-----------------+----------+----------------+------------------------------------------------------+
+|  Intersect      |    ∩     |                |  Set theory.                                         |
++-----------------+----------+----------------+------------------------------------------------------+
+|  Difference     |    −     |                |  Set theory.                                         |
++-----------------+----------+----------------+------------------------------------------------------+
+|  Rename         |    ρ     |   rho          |  Corresponds to Latin letter r, for rename.          |
++-----------------+----------+----------------+------------------------------------------------------+
+|  Aggregate      |    𝛾     |   gamma        |  Corresponds to Latin letter g, for group.           |
++-----------------+----------+----------------+------------------------------------------------------+
+
+Select
+^^^^^^
+The select operation selects rows based on a predicate expression.
+It's written as ``σ<expression>(table)`` and is equivlent to ``SELECT * FROM table WHERE expression``.
+
+Project
+^^^^^^^
+The project operation selects columns.
+It's written as ``Π<expression>(table)``, and is eqivalent to ``SELECT col1, col2, ... FROM table``.
+
+Product
+^^^^^^^
+The product operation is like a cross join or cartesian product.
+It's written as ``table1 × table2`` and is equivalent to ``SELECT * FROM table1 CROSS JOIN table2``.
+
+Join
+^^^^
+The join operation is written as ``table1 ⋈ <expression> table2``, and is identical to a select on
+a product of table1 and table2 ``σ<expression>(table1 × table2)``.
+It's equivelent to ``SELECT * FROM table1 INNER JOIN table2 ON expression``.
+
+Union, intersect, difference
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+These operations work just like they do in set theory.
+Tables must have the same columns to work with these operators.
+There can be no duplicate rows, entries are unique like elements in a set are.
+
+I've lost my motivation to do the rest of this section.
