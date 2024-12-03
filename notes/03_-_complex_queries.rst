@@ -909,7 +909,8 @@ When WITH CHECK OPTION is specified, the DB rejects inserts and updates that don
 
 Operations and expressions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
-In relational algebra, the various operations of SQL are denoted using infix binary operators.
+In relational algebra, the various operations of SQL are denoted using binary operators.
+Some of these are infix, and some prefix.
 
 +-----------------+----------+----------------+------------------------------------------------------+
 |  Operation      |  Symbol  |  Greek letter  |  Derivation                                          |
@@ -960,4 +961,50 @@ These operations work just like they do in set theory.
 Tables must have the same columns to work with these operators.
 There can be no duplicate rows, entries are unique like elements in a set are.
 
-I've lost my motivation to do the rest of this section.
+The MINUS and INTERSECT keywords are not implemented in MySQL.
+You can instead use joins for these operations.
+
+::
+
+  -- a `union` b
+  select A1, A2, from A inner join B on (A1 = B1 and A2 = B2);
+
+  -- a - b
+  select A1, A2 from A left join B on (A1 = B1 and A2 = B2) where B1 is NULL;
+
+Rename
+^^^^^^
+The rename operation specifies new table and column names.
+The rename operation is written as ``ρ<table_name>(col_name_1, col_name_2, ...)(table)``.
+If ``table_name`` is omitted, only the oclumn names are changed.
+If ``(col_name_1, col_name_2, ...)`` is omitted, only the table name is changed.
+
+Aggregate
+^^^^^^^^^
+The aggregate operation applies aggregate functions like SUM(), AVG(), MIN() and MAX().
+The aggregate operations is written as ``group_column 𝛾 SUM(column)(table)``.
+
+Query optimization
+^^^^^^^^^^^^^^^^^^
+Relational algebra expressions are equivalent if th eexpressions operate on the
+same tables and generate the same result.
+
+A **query optimizer** converts a query into a sequence of low-lvel database
+actions called the **query execution plan**. 
+
+The query execution plan specifies precisely how to process an SQL statement.
+The query optmizer is similar to an optimizing compiler.
+
+The query optimizer:
+
+* Converts a query to a relational algebra expression.
+* Generates equivalent expressions.
+* Estimates the cost of each operation of each expression.
+* Determines the optimal expression with the lowest total cost.
+* Converts the optimal expression into a query execution plan.
+
+The cost of an operation is a numeric estimate of processing time.
+The cost estimate usually combines both storage media access and 
+computation time in a single measure.
+
+
