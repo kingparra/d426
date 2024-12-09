@@ -181,3 +181,54 @@ Distinguish strong and weak entities
 Distinguising strong and weak entities is part of the analysis phase of design.
 
 
+4.5 Supertype and subtype entities
+----------------------------------
+
+Supertype and subtype entities
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+An **entity type** is a set of entity instances.
+A subtype entity is a subset of another entity type, called the supertype entity.
+On ERDs subtype entities are drawn within the supertype.
+
+A supertype entity usually has several subtypes.
+Attributes of the supertype apply to all subtypes.
+Attributes of a subtype do not apply to other subtypes or the supertype.
+
+A supertype entity identifies its subtype entities.
+The identifying relationship is called an **IsA relationship**.
+This is basic subtype/supertype vocabulary from OOP.
+
+Similar entities and optional attributes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+**Similar entities** are entities that have many common attributes and relationships.
+Sometimes the common attributes can be refactored into a supertype that they inherit from.
+
+Partitions
+^^^^^^^^^^
+A **partition** of a supertype entity is a group of mutually exclusive subtype entities.
+A supertype entity can have several partitions.
+Subtype entities within each partition are disjoint and do not share instances.
+Subtype entities in different partitions overlap and do share instances.
+
+In diagrams, subtype entities within each partition are vertically aligned.
+Subtype entities in different partitions are horizontally aligned.
+
+Each partition corresponds to an optional partition attribute of the supertype entity.
+The partition attriube indicates which subtype entity is associated with each supertype instances.
+
+Database design
+^^^^^^^^^^^^^^^
+Create supertype and subtype entities
+
+* Identify supertype and subtype entities.
+* Replace similar entities and optional attributes with supertype and subtype entities.
+* Identify partitions and partition attrbutes.
+* Document supertypes, subtypes, and partitions in glossary and ER diagram.
+
+Creating supertype and subtype entities is the last of four analysis steps:
+
+1. Discover entites, relationships, and attributes.
+2. Determine cardinality.
+3. Distinguish strong and weak entities.
+4. Create supertype and subtype entities.
+
