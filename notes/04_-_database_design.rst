@@ -1,0 +1,183 @@
+Unit 4: Database Design
+***********************
+
+
+4.1 Entities, relationships, and attributes
+-------------------------------------------
+Database design begins with erbal or written requirements for the database.
+Requirements are then formalized as an entity-relationship model and then impemented in SQL.
+
+An **entity-relationship model** is a high-level representation of data requriements, ignoring implementation details.
+It includes three types of objects:
+
+* **entity**: a person, place, product, concept, or activity.
+* **relationship**: a statement about two entities.
+* **attribute**: a descriptive property of an entity.
+
+A **reflexive relationship** relates an entity to itself.
+
+Entity Relationship Dagram (ERD) and Glossary
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+An ERD is a diagram of entities, relationships, and attributes.
+Entities are drawn as rectangles.
+Relationships are drawn as lines connecting rectangles.
+Attributes appear as additional text within an entity rectangle, under the entity name.
+
+A **glossary**, also known as a data dictonary or repository, documents additional detail in text format.
+A glossary includes names, synonyms, and descriptions of entities, relationships, and attributes.
+
+Types and instances
+^^^^^^^^^^^^^^^^^^^
+In entity-relationship modeling types are viewd as sets and instances are viewed as elements.
+
+Types:
+
+* An **entity type** is a set of things.
+* A **relationshp type** is a set of related things.
+* An **attribute type** is a set of values.
+
+Instances:
+
+* An **entity instance** is an indivudual thing.
+* A **relationship instance** is a statement about entity instances.
+* An **attribute instance** is an individual value.
+
+Database design
+^^^^^^^^^^^^^^^
+Complex databases are developed in three phases:
+
+* **Analysis** develops an entity-relationship model, caputuring data requirements while ignoring implementation details.
+* **Logical design** converts the entity-relationship model into tables, columns, and keys for a particular DB implementation.
+* **Pyhsical design** adds indexes and specifies how tables are organized on storage media.
+
+
+4.2 Discovery
+-------------
+Entities, relationships, and attributes are discovered in interviews with database users and managers.
+
+* Entities usually appear as nouns, but not all nouns are entities.
+  Designers should ignore nouns that denote specific data or are not relevant to the database.
+
+* Relationships are often expressed as verbs.
+
+* Attributes are usually nouns that denote specific data, such as names, dates, quantities, and monetary values.
+
+Names
+^^^^^
+Entity names are a singular noun.
+Relationship names have the form Entity-Verb-Entity. The verb should be active rather than passive.
+Attribute names have the form EntityQualifierType, such as EmployeeFirstName.
+
+Database design
+^^^^^^^^^^^^^^^
+* Identify entities, relationships, and attributes in interviews.
+* Draw ER diagram.
+* List standard attribute types in the glossary.
+* Document names, synonyms, and descriptions in the glossary.
+
+
+4.3 Cardinality
+---------------
+https://en.wikipedia.org/wiki/Entity%E2%80%93relationship_model
+
+In entity-relationship modeling, cardinality refers to the number of times one
+entity can (or must) be associated with each occurence of another entity.
+
+Relationship maximum (maxima) and relationship minimum (minima)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Maxima (or relationship maximum) is the maximum number of relationships an entity can participate in.
+Minima (or realationship manimum) is the minimum number of relationships an entity must participate in.
+
+Relationship maximum is the greatest number of instances of one entity that can relate to a single instance of another entity.
+A relationship has two maxima, one for each of the related entities.
+Maxima are usually specified as one 1 or many M, but may be any number.
+A related entity is singular when the maxima is one and plural when the maxima is many.
+
+
+::
+
+  +--------+                                             +---------+
+  | Flight |--maxima(minama)------------ maxima(minima)--| Booking |
+  +--------+                                             +---------+
+
+Attribute maximum and minimum
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Attribute maximum and attribute minimum describe the greatest and least number
+of attribute values that should be found in a row (or tuple).
+
+::
+
+  +------------------------------+
+  |  Employee                    |
+  +------------------------------+
+  |  EmployeeNumber 1(1) <----------- singular, required
+  |  PassportNumber 1(0) <----------- singular, optional
+  |  FullName 1(1)   <--------------- singular, required
+  |  SkillCode M(0)  <--------------- plural,   optional
+  +------------------------------+
+
+Unique attributes
+^^^^^^^^^^^^^^^^^
+::
+
+  +------------------------------+
+  |  Employee                    |
+  +------------------------------+
+  |  EmployeeNumber 1-1(1)       |
+  |  PassportNumber 1-1(0)       |
+  |  FullName M-1(1)             |
+  |  SkillCode M-M(0)            |
+  +------------------------------+
+
+The format for these cardinality constraints are
+::
+
+  cardinality_constraint ::= minimum "-" maximum "(" required ")"
+
+  minimum ::= M | number
+
+  maximum ::= M | number
+
+  required ::= 0 | 1
+
+  number ::= 0 | number + 1
+
+Steps to determine cardinality
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+* Determine relationship maxima and minima.
+* Determine attribute maxima and minama.
+* Identify unique attributes.
+* Document cardinality in glossary and, optionally, on the ERD.
+
+
+4.4 Strong and weak entities
+----------------------------
+
+Strong entities
+^^^^^^^^^^^^^^^
+An **identifying attribute*** is an attribute that is unique, singular, and required.
+Identifying attributes correspond with entity instances one-to-one.
+
+A **strong entity** has one or more identifying attributes.
+When a strong entity is implemented as a table, one of the indetifying attributes may beceome the primary key.
+
+Weak entities
+^^^^^^^^^^^^^
+A **weak entity** does not have an identifying attriute (or primary key).
+Instead, a weak entity usually has a relationship, called an **identifying
+relationship**, to another entity, called an **identifying entity**.
+Cardinality of the identifying entity is 1(1).
+In ERDs, a diamond at the end of a line between entities indicates an identifying relationship.
+The diamond goes on the end where the strong entity is.
+
+Database design
+^^^^^^^^^^^^^^^
+Distinguish strong and weak entities
+
+* Identify strong and weak entities.
+* Determine the identifying relationship(s) for each weak entity.
+* Document weak entities and identifying relationships in glossary and ER diagram.
+
+Distinguising strong and weak entities is part of the analysis phase of design.
+
+
