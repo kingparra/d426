@@ -232,3 +232,101 @@ Creating supertype and subtype entities is the last of four analysis steps:
 3. Distinguish strong and weak entities.
 4. Create supertype and subtype entities.
 
+
+4.6 Alternative modeling conventions
+------------------------------------
+
+Diagram conventions
+^^^^^^^^^^^^^^^^^^^
+Diagram conventions for ERDs vary widely. Some ERDs may:
+
+* Depict relationship names inside a diamond.
+* Depict weak entities and identifying relationships with double lines.
+* Depict subtype entities with IsA relationships rather than inside of supertype entities.
+* Use color, dashed lines, or double lines to convey additional information.
+
+Crow's foot notation
+::
+
+
+                      
+  +-----------+            Advises            +-----------+
+  |  Faculty  |-------------------------------|  Student  |
+  +-----------+ 1(1)                     M(0) +-----------+
+                   
+
+  +-----------+            Advises           /+-----------+
+  |  Faculty  |--|-|----------------------o-<-|  Student  |
+  +-----------+                              \+-----------+
+                    
+
+Model conventions
+^^^^^^^^^^^^^^^^^
+ER modeling concepts also vary. Some ER models may:
+
+* Allow relationships between three or more entities.
+* Decompose a complex model into a group of related entited called a subject area.
+* Refer to strong entities as independent and weak entities as dependent.
+
+Several model conventions are standardized and widely used. Leading conventions include:
+
+* Unified Modeling Language (UML).
+* IDEF1X, whatever that is...
+* Chen notation
+
+
+4.7 Implementing entities
+-------------------------
+
+Selecting primary keys
+^^^^^^^^^^^^^^^^^^^^^^
+Primary keys should be:
+
+* Unique
+* Not NULL
+* Never changes (stable)
+* Simple (easy to type and store)
+* Meaningless (should not contain descriptive information)
+
+Implementing strong entities
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+A strong entity becomes a strong table.
+
+Implementing subtype entities
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+A subtype entity becomes a subtype table and is implemented as follows:
+
+* The primary key is identical to the supertype primary key.
+* The primary key is also a foreign key that references the supertype primary key.
+
+(Can a primary key be a foreign key? Does that make sense? I'm not sure it makes sense...)
+
+The foreign key implements the **IsA** identifying relationship.
+Foreign keys that implement identifying relationshps usually have the following referential integrity actions:
+
+* Cascade on primary key update and delete.
+* Restrict on foreign key insert and update.
+
+On table diagrams, open bullets denote foreign key columns.
+
+Implementing weak entities
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+A weak entity becomes a weak table.
+The primary key is usually composite and includes:
+
+* A foreign key that references the primary key of the identifying table.
+* Another column that makes the composite primary key unique.
+  If no suitable column is available in the weak table, an artificial column can be created.
+
+Database design
+^^^^^^^^^^^^^^^
+* Implement strong entities as tables.
+* Create an artificial key when no suitable primary key exists.
+* Implement subtype entities as tables.
+* Implement weak entities as tables.
+* Specify cascade and restrict actions for identifying relationships.
+
+
+4.8 Implementing relationships
+------------------------------
+
