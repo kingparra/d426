@@ -330,3 +330,34 @@ Database design
 4.8 Implementing relationships
 ------------------------------
 
+Implementing many-one relationships
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+* The foreign key goes in the table on the 'many' side of the relationship.
+
+* The foreign key refers to the primary key on the 'one' side.
+
+* The foreign key name is the primary key name with an optional prefix.
+  The prefix is derived from the relationship name and clarifies the meaning of the foreign key.
+
+Implementing one-one relationships
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+* The foreign key can go in the table on either side of the relationship.
+  Usually, the foreign key is placed in the table with fewer rows, to minimize the number of NULL values.
+
+* The foreign key refers to the primary key on the opposite side of the relationship.
+
+* The foreign key name is the primary key name with an optional prefix.
+  The prefix is derived from the relationship name and clarifies the meaning of the foreign key.
+
+Implementing many-many relationships
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+A many-may relationship becomes a new weak table.
+
+* The new table contains two foreign keys, referring to the primary keys of the related tables.
+
+* The primary key of the new table is the composite of the two foreign keys.
+
+* The new table is identified by the related tables, so primary key cascade and foreign key restrict rules are specified.
+
+* The new table name consists of the related table names with an optional qualifier in between.
+  The qualifier is derived from the relationship name and clarifies the meaning of the table.
