@@ -361,3 +361,63 @@ A many-may relationship becomes a new weak table.
 
 * The new table name consists of the related table names with an optional qualifier in between.
   The qualifier is derived from the relationship name and clarifies the meaning of the table.
+
+
+4.9 Implementing attributes
+---------------------------
+
+Implementing plural attributes
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+In the "implement entities" step, entities become tables and attributes becom columns.
+Singular attributes remain in the initial table, but plural attributes move to a new weak table:
+
+* The new table contains the plural attribute and a foreign key referencing the initial table.
+
+* The primary key of the new table is the composite of the plural attribute and the foreign key.
+
+* The new table is identified by the initial table, so primary key cascade and foreign key restrict rules are specified.
+
+* The new table name consists of the initial table name followed by the attribute name.
+
+If a plural attribute has a small, fixed maximum, the plural attribute can be implemented as multiple columns in the initial table.
+However, implementing plural attributes in a new table simplifies queries and is usually a better solution.
+
+Implementing attributes types
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Each attribute has a type.
+During the discovery step, attribute types are selected from a list of standard attribute types in the glossary.
+During logical design, an SQL datatype is defiend for each attribute type and documented in the glossary.
+
+Implementing attribute cardinality
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Attributes can be unique, required, or optional:
+
+* Each unique attribute instance describes at most one entity instance.
+* Each entity instance has a least one required attribute instance.
+* Each entity instance can have zero optional attribute instances.
+
+Unique and required attributes are implemented with keywords following the column name in the CREATE TABLE statement.
+
+* UNIQUE is specified on columns derived from unique attributes.
+* NOT NULL is specified on columns derieved from required attributes.
+* PRIMARY KEY is specified for primary key columns.
+  The PRIMARY KEY keyword automatically enforces unique and required, so additional keywords NOT NULL and UNIQUE are unnecessary.
+
+UNIQUE and NOT NULL are also specified on foreign key columns derived from unique and required relationships.
+Optional attributes and relationshps become columns with NULLs allowed and do not require special keywords.
+
+::
+
+  CREATE TABLE Airport (
+    AirportCode CHAR(3) PRIMARY KEY,
+    AirportName VARCHAR(30) NOT NULL UNIQUE,
+    CountryCode CHAR(3) NOT NULL,
+    CityName VARCHAR(30)
+  );
+
+Database design
+^^^^^^^^^^^^^^^
+* Implement plural attributes as new weak tables.
+* Specify cascade and restrict rules on new foreign keys in weak tables.
+* Specify column datatypes corresponding to attribute types.
+* Enforce relationship and attribute cardinality with UNIQUE and NOT NULL keywords.
