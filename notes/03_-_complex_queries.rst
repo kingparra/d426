@@ -175,6 +175,7 @@ For example, ``sum(Salary) + sum(Bonus)`` is not equal to ``sum(Salary + Bonus)`
 3.4 Join queries
 ----------------
 https://dev.mysql.com/doc/refman/8.0/en/join.html
+https://blog.jooq.org/a-probably-incomplete-comprehensive-guide-to-the-many-different-ways-to-join-tables-in-sql/
 
 Joins combine rows from multiple tables based on a related column.
 They allow you to retrieve related data stored in separate tables.
@@ -251,7 +252,7 @@ An inner join selects only rows matching the ON condition which are present in b
 Outer join
 ^^^^^^^^^^
 An **outer join** is any join that selects unmatched rows, including left, right, and full joins.
-MySQL suppors inner, left, and right join but not full join.
+MySQL supports inner, left, and right join but not full join.
 
 
 Full join (union)
@@ -268,7 +269,7 @@ The full join is also known as the full outer join.
   -- |  1 | John     |        |  2 | HR    |        | John     | NULL  |
   -- |  2 | Sarah    |        |  3 | IT    |        | Sarah    | HR    |
   -- +----+----------+        +----+-------+        | NULL     | IT    |
-  --                                               +----------+-------+
+  --                                                +----------+-------+
 
   SELECT employees.name AS emp_name, departments.name AS dept
   FROM employees FULL OUTER JOIN departments

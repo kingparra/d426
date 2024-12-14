@@ -198,3 +198,22 @@ Foriegn Key
         order_id INT REFERENCES orders(order_id)
     );
 
+Reflexive Relationship
+
+  A reflexive relationship relates an entity to itself.
+
+Entity Type
+
+  An entity type is a set of things.
+
+Relationship type
+
+  A relationship type is a set of related things.
+
+Attribute Type
+
+  An attribute type is a set of related values.
+
+Entity Instance
+
+  An entity instance is an individual thing.

@@ -454,7 +454,7 @@ First normal form (1NF)
 Second normal form (2NF)
 ^^^^^^^^^^^^^^^^^^^^^^^^
 * Meet first normal form.
-* Non-key columns must depend on the entire primary key, not just part of it.
+* Non-key columns must depend only on the entire primary key, not just part of it.
 
 Third normal form (3NF)
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -467,3 +467,8 @@ Boyce-Codd normal form (BCNF)
 * If a key uniquely identifies a column, it must also uniquely identify every row in the table.
 * In other words, unnecessary or redundant identifying columns should be removed.
 
+When you're actually implementing BCNF, you'll want to follow these three steps:
+
+1. **List all unique columns.** Remove any columns in composite keys that are not necessary for uniqueness.
+2. **Identify dependencies on non-unique columns.**
+3. **Eliminate dependencies on non-uniqe columns.**
