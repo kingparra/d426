@@ -421,3 +421,49 @@ Database design
 * Specify cascade and restrict rules on new foreign keys in weak tables.
 * Specify column datatypes corresponding to attribute types.
 * Enforce relationship and attribute cardinality with UNIQUE and NOT NULL keywords.
+
+
+4.10 First, second, and third normal form
+-----------------------------------------
+
+Functional dependence
+^^^^^^^^^^^^^^^^^^^^^
+A ➞  B
+B depends on A.
+For each value of A there is exactly one value of B.
+
+Normal forms
+^^^^^^^^^^^^
+The idea of a normal form (in math) is to take some reducable expression and
+turn it into a simplified, or more reduced, expression by applying
+transformation rules to it. In DBMS, the transformations are mostly about
+centralizing where data is stored, removing duplication, and making sure
+data can be uniquely identified. All of these things help ensure that there
+are no data modifications that accidentally violate data integerity.
+
+Data modifications that violate integrity are called **anomolies**. Some
+different types of anomolies include insertion anomaly, update anomaly,
+and deletion anomaly.
+
+First normal form (1NF)
+^^^^^^^^^^^^^^^^^^^^^^^
+* Every cell must hold exactly one value.
+* There must be a primary key which uniquely identifies each row.
+* No duplicate rows are allowed.
+
+Second normal form (2NF)
+^^^^^^^^^^^^^^^^^^^^^^^^
+* Meet first normal form.
+* Non-key columns must depend on the entire primary key, not just part of it.
+
+Third normal form (3NF)
+^^^^^^^^^^^^^^^^^^^^^^^
+* Meet second normal form.
+* Non-key columns must depend directly on the primary key, instead of other non-key columns.
+
+Boyce-Codd normal form (BCNF)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+* Meet third normal form.
+* If a key uniquely identifies a column, it must also uniquely identify every row in the table.
+* In other words, unnecessary or redundant identifying columns should be removed.
+
