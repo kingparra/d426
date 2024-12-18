@@ -4,7 +4,7 @@ Unit 4: Database Design
 
 4.1 Entities, relationships, and attributes
 -------------------------------------------
-Database design begins with erbal or written requirements for the database.
+Database design begins with verbal or written requirements for the database.
 Requirements are then formalized as an entity-relationship model and then impemented in SQL.
 
 An **entity-relationship model** is a high-level representation of data requriements, ignoring implementation details.
@@ -132,7 +132,7 @@ Unique attributes
 The format for these cardinality constraints are
 ::
 
-  cardinality_constraint ::= minimum "-" maximum "(" required ")"
+  cardinality_constraint ::= maximum_a "-" maximum_b "(" minimum_b ")"
 
   minimum ::= M | number
 
@@ -441,9 +441,10 @@ centralizing where data is stored, removing duplication, and making sure
 data can be uniquely identified. All of these things help ensure that there
 are no data modifications that accidentally violate data integerity.
 
-Data modifications that violate integrity are called **anomolies**. Some
-different types of anomolies include insertion anomaly, update anomaly,
-and deletion anomaly.
+Data modifications that violate integrity are called **anomolies**. Anomalies
+occur when redundant data creates inconsistencies during insertion, updating,
+or deletion. Some different types of anomolies include insertion anomaly,
+update anomaly, and deletion anomaly.
 
 First normal form (1NF)
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -454,16 +455,23 @@ First normal form (1NF)
 Second normal form (2NF)
 ^^^^^^^^^^^^^^^^^^^^^^^^
 * Meet first normal form.
-* Non-key columns must depend only on the entire primary key, not just part of it.
+* Every non-key column is fully dependent on the entire primary key, not just
+  part of the primary key.
+* It is possible that a non-key column depends on the entire primary key and
+  another column that isn't part of the primary key (transitive dependencies
+  are allowed in 2NF).
+* 2NF rules only applies when there is a composite primary key. Tables with a
+  simple primary key are already in 2NF.
 
 Third normal form (3NF)
 ^^^^^^^^^^^^^^^^^^^^^^^
 * Meet second normal form.
-* Non-key columns must depend directly on the primary key, instead of other non-key columns.
+* No transitive dependencies exist (non-key columns cannot depend on other non-key columns.)
 
 Boyce-Codd normal form (BCNF)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 * Meet third normal form.
+* Every determinant is a candidate key.
 * If a key uniquely identifies a column, it must also uniquely identify every row in the table.
 * In other words, unnecessary or redundant identifying columns should be removed.
 
@@ -472,3 +480,4 @@ When you're actually implementing BCNF, you'll want to follow these three steps:
 1. **List all unique columns.** Remove any columns in composite keys that are not necessary for uniqueness.
 2. **Identify dependencies on non-unique columns.**
 3. **Eliminate dependencies on non-uniqe columns.**
+
